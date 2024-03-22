@@ -1,0 +1,23 @@
+{
+  "name": "collaborative_drawing_game",
+  "version": "1.0.0",
+  "description": "a project built to help connect people through drawing games",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "keywords": [
+    "P5.js",
+    "node",
+    "drawing",
+    "creativity",
+    "connection"
+  ],
+  "author": "Phaedra Berger",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.18.2",
+    "socket.io": "^4.7.4"
+  }
+}

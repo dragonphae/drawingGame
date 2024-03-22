@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <script src="https://cdn.socket.io/4.7.4/socket.io.min.js" integrity="sha384-Gr6Lu2Ajx28mzwyVR8CFkULdCU7kMlZ9UthllibdOSo6qAiN+yXNHqtgdTvFXMT4" crossorigin="anonymous"></script>
+    
+
+    <style>
+        table, th, td {
+          border: 1px solid black;
+          border-collapse: collapse;
+        }
+        th, td {
+          padding-top: 100px;
+          padding-bottom: 100px;
+          padding-left: 100px;
+          padding-right: 100px;
+        }
+    </style>
+  
+  
+    <!-- This a script that controls the movement of your player character-->
+    <script>
+        //a function that is called when a key is pressed and controls the player movements
+        
+
+        window.addEventListener("keydown", moveScript);
+
+
+        //a function that is called when a key is pressed and controls the player movements
+        function moveScript(event) {
+            console.log(event);
+            console.log (event.key);
+            var a_key = "a";
+            var w_key = "w";
+            var s_key = "s";
+            var d_key = "d";
+
+            var chara = document.getElementById("character_avatar");
+
+            if (event.key === d_key){
+                console.log ("should go right");
+                console.log(chara);
+                console.log (chara.style.right);
+                //chara.style.width = '1000px';
+                chara.style.left = parseInt(chara.style.left) + 20 + 'px'; 
+            }
+
+            if (event.key === a_key){
+                console.log ("should go left");
+                console.log (chara.style.left);
+               // chara.style.width = '100px';
+                chara.style.left = parseInt(chara.style.left) - 20 + 'px'; 
+            }
+
+            if (event.key === w_key){
+                console.log ("should go up");
+                console.log (chara.style.top);
+                //chara.style.height = '1000px';
+                chara.style.top = parseInt(chara.style.top) - 20 + 'px'; 
+            }
+
+            if (event.key === s_key){
+                console.log ("should go down");
+                console.log (chara.style.bottom);
+                //chara.style.height = '100px';
+                chara.style.top = parseInt(chara.style.top) + 20 + 'px'; 
+            }
+        }
+  
+    </script>
+    
+
+    // a script that controls the even monitors on the buildings   
+    <script>
+    let room = document.getElementByID("room1");
+    room.addEventListener("keydown",enterScript);
+    
+    //a function that defines the behaviour of the entering room even listener
+    function enterScript(event){
+
+        
+        if (event.key === "ENTER"){
+            location.href = "index.html";
+            }
+
+        }
+
+    </script>
+
+
+    
+
+
+
+
+
+</head>
+
+<body>
+    <h1>This is the World.</h1>
+    <p>Try moving around with wasd.</p>
+    <p>Click <a href= "index.html">HERE</a> to go to the drawing room.</p>
+
+    <img id="character_avatar" 
+        style="position: absolute; left: 0px; top: 0px;"
+        src="Avatar.png"
+        alt="An image of a silly teal-haired girl in a yellow hat.">
+
+    <div>
+        <img id="orb1" src="Orb.png" alt="a small rainbow orb">
+    </div>
+
+    <table>
+        <tr>
+            <td></td>
+            <td></td>
+            <td></td>
+        </tr>
+        <tr>
+        </tr>
+            <td></td>
+            <td></td>
+            <td></td>
+        <tr>
+          <td> <img id="room1" src="DrawingRoom.png" alt="a green square that says 'Drawing Room'"></td>
+          <td></td>
+          <td></td>
+        </tr>
+      </table> 
+
+  
+
+                                            
+
+
+
+    
+
+</body>
+</html>
