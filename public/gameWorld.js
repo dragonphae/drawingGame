@@ -44,7 +44,26 @@ let galleryHeight = 100;
 let galleryWidth = 100;
 
 //a list of emotion words to serve as prompts ... update later from some sort of source
-let emotionList = ["sadness", "joy", "fear", "anger", "disgust", "surprise"];
+let emotionList = ["sadness", "joy", "fear", "anger", "disgust", "surprise", "adoration",
+"affection", "alarm", "agitation", "agony", "amazement", "ambivalence", "amusement",
+"anguish", "annoyance", "anticipation", "anxiety", "apathy", "apprehension",
+"astonishment", "awe", "bafflement", "bewilderment", "bitterness", "bliss",
+"boredom", "calm", "cheerfulness", "confidence", "contempt", "contentment", "curiosity",
+"cynicism", "dejection", "delight", "depression", "despair", "determination", "disappointment",
+"disbelief", "dismay", "dread", "ecstasy", "elation", "embarrassment",
+"empathy", "enchantment", "enjoyment", "enlightenment", "enthusiasm", "envy",
+"epiphany", "euphoria", "exasperation", "excitement", "fascination", "fondness",
+"friendliness", "frustration", "fury", "glee", "glumness", "gratitude", "greed",
+"grief", "grouchiness", "grumpiness", "guilt", "happiness", "hatred",
+"helplessness", "hope", "homesickness", "hopelessness", "horror", "humiliation",
+"humility", "hysteria", "impatience", "indifference", "infatuation", "indignance", "insecurity",
+"infuriation", "intrigue", "irritation", "isolation", "jealousy",
+"jubilation", "kindness", "laziness", "loneliness", "longing", "love", "misery",
+"mortification", "nervousness", "nostalgia", "numb", "outrage", "panic", "overwhelm",
+"patience", "passion", "pensiveness", "pessimism", "pity", "pride", "rage", "regret", "relaxation",
+"relief", "reluctance", "remorseful", "relaxation", "resentment", "resignation",
+"restlessness", "revulsion", "ruthlessness", "shame", "sorrow", "serentity", "spite", "suspicion",
+"sympathy", "triumph", "torment", "vulnerable", "worried", "uneasy", "unsettled", "trust"];
 
 
 //login button
