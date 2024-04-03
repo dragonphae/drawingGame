@@ -637,10 +637,12 @@ function setup() {
             let collision = collisionCheck(chara, creature);
             if (collision){
               creatureCollided = creature;
-              respondDrawingDrawn = false;
-              creatureCollided.drawing.width = width;
-              creatureCollided.drawing.height = height;
-              gameState = "respondDrawing";
+              if (creatureCollided.creator != chara.userName){
+                respondDrawingDrawn = false;
+                creatureCollided.drawing.width = width;
+                creatureCollided.drawing.height = height;
+                gameState = "respondDrawing";
+              }
               break;
             }
 
