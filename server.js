@@ -53,7 +53,7 @@ function newConnection(socket) {
         //add creature
         creatureDict[data.id] = {'x': data.x, 'y': data.y, 'emotion': data.emotion,
         'creator': data.creator, 'background': data.background, 'outline': data.outline,
-        'strokeList': data.strokeList};
+        'strokeList': data.strokeList, 'direction': data.direction, 'speed': data.speed, 'id': data.id};
         console.log(creatureDict);
 
         //send dictionary

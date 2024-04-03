@@ -549,7 +549,9 @@ function setup() {
           outline: newCreature.outline,
           background: newCreature.background,
           strokeList: newCreature.strokeList,
-          id: newCreature.id
+          id: newCreature.id,
+          direction: newCreature.direction,
+          speed: newCreature.speed
           }
         socket.emit('creatureMovement', data);
         
@@ -735,15 +737,12 @@ function setup() {
         //check if already in list
         if (creatureIDList.includes(k)){
           //update 
-          console.log ('updating list of valid creature ids');
+          
         }
         else{
           //add new creature
-          console.log(offscreenGraphicsBuffer);
-          console.log(data);
           let item = data[k];
           let b = item.background;
-          console.log(b[0], b[1], b[2]);
           offscreenGraphicsBuffer.background(b[0], b[1], b[2]);
           //now strokes
           for (let s of item['strokeList']){
@@ -765,9 +764,12 @@ function setup() {
           newC.outline = item['outline'];
           newC.strokeList = item['strokeList'];
           newC.id = item['id'];
+          newC.direction = item['direction'];
+          newC.speed = item['speed'];
           creatureList.push(newC);
           creatureIDList.push(newC.id);
-          console.log("should have added new creature to list! Where is friend?");
+          console.log("added new creature");
+          console.log(creatureList);
       }
     }
   }
