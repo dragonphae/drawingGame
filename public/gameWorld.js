@@ -158,6 +158,7 @@ class Creature {
   }
 
   move(){
+    console.log ("creature move function called!");
     let possiblePositionX = width/50;
     let possiblePositionY = height/50;
     //add random chance of changing direction?
@@ -199,8 +200,11 @@ class Creature {
         } 
       } 
       else {
+        console.log("creature position changed!")
         this.prevX = this.x;
+        this.x = possiblePositionX;
         this.prevY = this.y;
+        this.y = possiblePositionY;
       }
   }
 }
