@@ -10,7 +10,8 @@ let myColor; //declare colour object
 
 //variables related to drawing
 let myBrush; //declare brush object
-let strokeList =[]; //declare strokeList
+let strokeList = []; //declare strokeList
+let stopDrawing = false;
 
 //declare switch statement for gameState
 //options are: "logIn", "playField", "createDrawing", "respondDrawing", "gallery"
@@ -79,6 +80,7 @@ class Character {
       this.isUp = false;
       this.isDown = false;
       this.userName = "";
+      this.tokens = 3;
 
     }
   
@@ -155,10 +157,15 @@ class Creature {
 
   display(){
     image(this.drawing,this.x,this.y);
+    push();
+    stroke(chara.colour[0], chara.colour[1], chara.colour[2]);
+    noFill();
+    strokeWeight(3);
+    rect(this.x - 2, this.y - 2, 104, 104);
+    pop();
   }
 
   move(){
-    console.log ("creature move function called!");
     let possiblePositionX = width/50;
     let possiblePositionY = height/50;
     //add random chance of changing direction?
@@ -200,7 +207,6 @@ class Creature {
         } 
       } 
       else {
-        console.log("creature position changed!")
         this.prevX = this.x;
         this.x = possiblePositionX;
         this.prevY = this.y;
@@ -260,7 +266,6 @@ function setup() {
 
     //create brush
     myBrush = new Brush("circle", 10, 0, 0, 0);
-    let strokeList = [];
     //random colour for creature drawing screen
     myColor = [random(0,255),random(0,255),random(0,255)];
 
@@ -295,20 +300,16 @@ function setup() {
     submitButtonDraw.on_clicked = function(){
       //later make a formula for a more complicated name for this image
       //save(cnv,'C:/Users/phaed/Desktop/Collaborative_Drawing_Game/drawingGame/DemoNewVersion/images/myCanvas.jpg');
-      let imgDrawing = get(0, 0, width, height);
-      imgDrawing.width = creatureWidth;
-      imgDrawing.height = creatureHeight;
-      let creatureName = "testName";
-      let newCreature = new Creature(imgDrawing,creatureName);
-      creatureList.push(newCreature);
-      
-      //back to playField
-      gameState = "playField";  
+      //draw quick
+      stopDrawing = true;
+       
     }
 
     //other submit button function
     submitButtonRespond.on_clicked = function(){
       //save image
+      //draw image quick
+      //save
       let imgDrawing = get(0, 0, width, height);
       imgDrawing.width = galleryWidth;
       imgDrawing.height = galleryHeight;
@@ -358,7 +359,7 @@ function setup() {
         push();
         textSize(25);
         textAlign(CENTER);
-        text("Welcome to the Emotion Drawing Game!", width/2, height/2);
+        text("Emotional Pictionary (Zoo Edition)", width/2, height/2);
         //enter name
         fill(255);
         rectMode(CENTER);
@@ -439,16 +440,38 @@ function setup() {
         //draw buttons
         button(drawButton);
         button(galleryButton);
+
+        //draw tokens
+        
+        push();
+        fill(0);
+        textAlign(LEFT, CENTER);
+        textSize(18);
+        text(chara.userName, 10, 25);
+        
+        fill (0,255,0);
+        triangle(10+20+70, 10, 10+20+70+15, 40, 10+20+70+30, 10);
+        fill(0);
+        text ("x" + str(chara.tokens), 10+20+70+30+10, 25);
+        pop();
+
+        //draw button triangle
+        push();
+        fill (0,255,0);
+        triangle(205-29, height - 36, 205-29+12, height - 14, 205-29+24, height - 36);
+        pop();
+
         break;
       case "createDrawing":
-        if (!createDrawingDrawn){
+        if (!createDrawingDrawn && !stopDrawing){
           background(myColor[0],myColor[1],myColor[2]);
           push();
           fill(0);
           textSize(20);
           textAlign(CENTER);
-          text("We are now in create drawing mode!", width/2, height/2);
-          text("Draw a creature that represents the emotion: " + random(emotionList ), width/2, height/2 + 20);
+          let emotion = random(emotionList);
+          text("Think of a time you felt the emotion: " + emotion, width/2, 70);
+          text("Now draw a creature that represents that experience", width/2, 90);
           pop();
 
   
@@ -456,8 +479,35 @@ function setup() {
         }
 
         //draw buttons
-        button(submitButtonDraw);
-        button(backButtonDraw);
+        if (!stopDrawing){
+          button(submitButtonDraw);
+          button(backButtonDraw);
+        }
+
+        if (stopDrawing){
+            push();
+        background(myColor[0],myColor[1], myColor[2]);
+        console.log(strokeList);
+        for (let s of strokeList){
+          fill(0);
+          strokeWeight(0);
+          console.log(s[0]);
+          console.log(s[1]);
+          ellipse(s[0],s[1],10,10);
+        }
+        let imgDrawing = get(0, 0, width, height);
+        pop();
+        imgDrawing.width = creatureWidth;
+        imgDrawing.height = creatureHeight;
+        let creatureName = "testName";
+        let newCreature = new Creature(imgDrawing,creatureName);
+        creatureList.push(newCreature);
+        strokeList = [];
+        stopDrawing = false;
+        
+      //back to playField
+      gameState = "playField"; 
+        }
         
         break;
       case "respondDrawing":
@@ -581,9 +631,12 @@ function setup() {
         break;
       case "createDrawing":
         myBrush.paint(mouseX, mouseY);
+        strokeList.push([mouseX, mouseY]);
+        console.log(strokeList);
         break;
       case "respondDrawing":
         myBrush.paint(mouseX, mouseY);
+        strokeList.push([mouseX, mouseY]);
         break;
       case "gallery":
         break;
@@ -616,8 +669,6 @@ function setup() {
   }
 
   function updatePlayers(data){
-    console.log("received message!");
-    console.log(data);
     playerDict = data;
   }
 
