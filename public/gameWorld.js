@@ -4,9 +4,17 @@
 var socket;
 var firstTime = true;
 var playerDict = {};
+var creatureDict = {};
+let creatureIDList = [];
+
+let randEmotion = "";
+
+let offscreenGraphicsBuffer;
+let cnv;
 
 let chara; // Declare object
 let myColor; //declare colour object
+let numCreaturesMade = 1;
 
 //variables related to drawing
 let myBrush; //declare brush object
@@ -153,12 +161,19 @@ class Creature {
     this.y = random(0, height - this.height);
     this.speed = random(1, 5);
     this.direction = random(["up", "down", "right", "left"]);
+    this.id = "";
+    this.emotion = "";
+    this.creator = "";
+    this.background = [];
+    this.outline = [];
+    this.strokeList = [];
+    
   }
 
   display(){
     image(this.drawing,this.x,this.y);
     push();
-    stroke(chara.colour[0], chara.colour[1], chara.colour[2]);
+    stroke(this.outline[0], this.outline[1], this.outline[2]);
     noFill();
     strokeWeight(3);
     rect(this.x - 2, this.y - 2, 104, 104);
@@ -253,11 +268,13 @@ class GalleryDrawing {
 
 
 function setup() {
-    let cnv = createCanvas(600, 600);
+    cnv = createCanvas(600, 600);
+    offscreenGraphicsBuffer = createGraphics(600,600);
 
     //socket network stuff
     socket = io.connect('http://localhost:3000');
     socket.on('playerMovement', updatePlayers);
+    socket.on('creatureMovement', updateCreatures);
     
     
     // Create object
@@ -279,11 +296,13 @@ function setup() {
 
     //add draw button function
     drawButton.on_clicked = function(){
-    myColor = [random(0,255),random(0,255),random(0,255)];
-    //get everything ready to start createDrawing;
-    
-    createDrawingDrawn = false;
-    gameState = "createDrawing";
+      if (chara.tokens > 0){
+        myColor = [random(0,255),random(0,255),random(0,255)];
+        //get everything ready to start createDrawing;
+        
+        createDrawingDrawn = false;
+        gameState = "createDrawing";
+      }
     }
 
     //add back button function
@@ -302,6 +321,7 @@ function setup() {
       //save(cnv,'C:/Users/phaed/Desktop/Collaborative_Drawing_Game/drawingGame/DemoNewVersion/images/myCanvas.jpg');
       //draw quick
       stopDrawing = true;
+      chara.tokens = chara.tokens - 1;
        
     }
 
@@ -310,6 +330,9 @@ function setup() {
       //save image
       //draw image quick
       //save
+      //update tokens
+      chara.tokens = chara.tokens + 1;
+
       let imgDrawing = get(0, 0, width, height);
       imgDrawing.width = galleryWidth;
       imgDrawing.height = galleryHeight;
@@ -321,6 +344,8 @@ function setup() {
 
       //get rid of creature from list
       creatureList = removeItemOnce(creatureList, creatureCollided);
+      //remove id from creatureIDList
+      creatureIDList = removeItemOnce(creatureCollided.id);
       
       //back to playField
       gameState = "playField";
@@ -433,6 +458,8 @@ function setup() {
           }
           socket.emit('playerMovement', data); 
         }
+
+        //send creature data
        
         
  
@@ -469,8 +496,8 @@ function setup() {
           fill(0);
           textSize(20);
           textAlign(CENTER);
-          let emotion = random(emotionList);
-          text("Think of a time you felt the emotion: " + emotion, width/2, 70);
+          randEmotion = random(emotionList);
+          text("Think of a time you felt the emotion: " + randEmotion, width/2, 70);
           text("Now draw a creature that represents that experience", width/2, 90);
           pop();
 
@@ -487,12 +514,9 @@ function setup() {
         if (stopDrawing){
             push();
         background(myColor[0],myColor[1], myColor[2]);
-        console.log(strokeList);
         for (let s of strokeList){
           fill(0);
           strokeWeight(0);
-          console.log(s[0]);
-          console.log(s[1]);
           ellipse(s[0],s[1],10,10);
         }
         let imgDrawing = get(0, 0, width, height);
@@ -501,12 +525,37 @@ function setup() {
         imgDrawing.height = creatureHeight;
         let creatureName = "testName";
         let newCreature = new Creature(imgDrawing,creatureName);
+        
+        newCreature.id = chara.userName + numCreaturesMade;
+        numCreaturesMade = numCreaturesMade + 1; 
+        newCreature.emotion = randEmotion;
+        newCreature.creator = chara.userName;
+        newCreature.outline = [chara.colour[0], chara.colour[1], chara.colour[2]];
+        newCreature.background = [myColor[0], myColor[1], myColor[2]];
+        newCreature.strokeList = strokeList;
         creatureList.push(newCreature);
-        strokeList = [];
+        creatureIDList.push(newCreature.id);
+        
         stopDrawing = false;
+
+        //emit creature update
+        
+        //x,y,emotion,creator, outline[r,g,b], background[r,g,b],strokes[[x,y]]
+        var data = {
+          x: newCreature.x,
+          y: newCreature.y,
+          emotion: newCreature.emotion,
+          creator: newCreature.creator,
+          outline: newCreature.outline,
+          background: newCreature.background,
+          strokeList: newCreature.strokeList,
+          id: newCreature.id
+          }
+        socket.emit('creatureMovement', data);
         
       //back to playField
-      gameState = "playField"; 
+        strokeList = [];
+        gameState = "playField"; 
         }
         
         break;
@@ -632,7 +681,6 @@ function setup() {
       case "createDrawing":
         myBrush.paint(mouseX, mouseY);
         strokeList.push([mouseX, mouseY]);
-        console.log(strokeList);
         break;
       case "respondDrawing":
         myBrush.paint(mouseX, mouseY);
@@ -670,6 +718,62 @@ function setup() {
 
   function updatePlayers(data){
     playerDict = data;
+  }
+
+  function updateCreatures(data){
+    //curWork
+    creatureDict = data;
+    console.log (creatureDict);
+    //later update creature list as well
+    //by making new creature and adding it?
+    //will ultimately need to check for inclusion
+    //make new creature if needed + update existing creatures
+    //curWork
+    let dataEmptyCheck = Object.keys(data);
+    if (dataEmptyCheck.length > 0){
+      for (let k of dataEmptyCheck){
+        //check if already in list
+        if (creatureIDList.includes(k)){
+          //update 
+          console.log ('updating list of valid creature ids');
+        }
+        else{
+          //add new creature
+          console.log(offscreenGraphicsBuffer);
+          console.log(data);
+          let item = data[k];
+          let b = item.background;
+          console.log(b[0], b[1], b[2]);
+          offscreenGraphicsBuffer.background(b[0], b[1], b[2]);
+          //now strokes
+          for (let s of item['strokeList']){
+            offscreenGraphicsBuffer.fill(0);
+            offscreenGraphicsBuffer.strokeWeight(0);
+            offscreenGraphicsBuffer.ellipse(s[0],s[1],10,10);
+          }
+          //get new image
+          let newCImage = createImage(offscreenGraphicsBuffer.width, offscreenGraphicsBuffer.height);
+          newCImage.copy(offscreenGraphicsBuffer, 0,0, offscreenGraphicsBuffer.width, offscreenGraphicsBuffer.height, 0, 0, offscreenGraphicsBuffer.width, offscreenGraphicsBuffer.height);
+          newCImage.width = creatureWidth;
+          newCImage.height = creatureHeight;
+          let newC = new Creature(newCImage, "name");
+          newC.x = item['x'];
+          newC.y = item['y'];
+          newC.emotion = item['emotion'];
+          newC.creator = item['creator'];
+          newC.background = item['creator'];
+          newC.outline = item['outline'];
+          newC.strokeList = item['strokeList'];
+          newC.id = item['id'];
+          creatureList.push(newC);
+          creatureIDList.push(newC.id);
+          console.log("should have added new creature to list! Where is friend?");
+      }
+    }
+  }
+
+    
+    
   }
 
   // function positionUpdate(pX, pY, pName){

@@ -2,6 +2,7 @@
 //variables I want to store later
 let connectionIDList = [];
 let playerDict = {};
+let creatureDict = {};
 
 //import module
 var express = require ('express');
@@ -27,8 +28,10 @@ function newConnection(socket) {
     connectionIDList.push(socket.id);
 
     socket.on('playerMovement', moveMsg);
+    socket.on('creatureMovement', creatureMsg);
     //send dictionary
     io.sockets.emit('playerMovement', playerDict);
+    io.sockets.emit('creatureMovement', creatureDict);
     //socket.on('mouse', mouseMsg);
 
     //function mouseMsg(data) {
@@ -44,6 +47,19 @@ function newConnection(socket) {
 
         //send dictionary
         socket.broadcast.emit('playerMovement', playerDict);
+    }
+
+    function creatureMsg(data){
+        //add creature
+        creatureDict[data.id] = {'x': data.x, 'y': data.y, 'emotion': data.emotion,
+        'creator': data.creator, 'background': data.background, 'outline': data.outline,
+        'strokeList': data.strokeList};
+        console.log(creatureDict);
+
+        //send dictionary
+        socket.broadcast.emit('creatureMovement', creatureDict);
+
+
     }
 
 }
