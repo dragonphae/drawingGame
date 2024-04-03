@@ -50,12 +50,21 @@ function newConnection(socket) {
     }
 
     function creatureMsg(data){
-        //add creature
-        creatureDict[data.id] = {'x': data.x, 'y': data.y, 'emotion': data.emotion,
-        'creator': data.creator, 'background': data.background, 'outline': data.outline,
-        'strokeList': data.strokeList, 'direction': data.direction, 'speed': data.speed, 'id': data.id};
-        console.log(creatureDict);
-
+        //check if creature needs to be removed
+        let keyList = Object.keys(creatureDict);
+        if (keyList.includes(data.id)){
+            //that means it's getting removed
+            let d = data.id;
+            delete creatureDict[d];
+        }
+        else {
+             //add creature
+             creatureDict[data.id] = {'x': data.x, 'y': data.y, 'emotion': data.emotion,
+             'creator': data.creator, 'background': data.background, 'outline': data.outline,
+             'strokeList': data.strokeList, 'direction': data.direction, 'speed': data.speed, 'id': data.id};
+             console.log(creatureDict);
+        }
+        
         //send dictionary
         socket.broadcast.emit('creatureMovement', creatureDict);
 

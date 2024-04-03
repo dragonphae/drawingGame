@@ -5,7 +5,7 @@ var socket;
 var firstTime = true;
 var playerDict = {};
 var creatureDict = {};
-let creatureIDList = [];
+var creatureIDList = [];
 
 let randEmotion = "";
 
@@ -40,7 +40,7 @@ let respondDrawingDrawn = false;
 
 //controls the list of gallery drawings
 let galleryList = [];
-let galleryHeight = 100;
+let galleryHeight = 120;
 let galleryWidth = 100;
 
 //a list of emotion words to serve as prompts ... update later from some sort of source
@@ -275,10 +275,11 @@ class Brush {
 
 //make a gallery drawing object
 class GalleryDrawing {
-  constructor(galleryImage, creator, collaborator){
+  constructor(galleryImage, creator, collaborator, emotion){
     this.drawing = galleryImage;
     this.creator = creator;
     this.collaborator = collaborator;
+    this.emotion = emotion;
   }
 }
 
@@ -357,14 +358,37 @@ function setup() {
       imgDrawing.height = galleryHeight;
       let creatorName = "testName";
       let collaboratorName = "testName";
-      let newGalleryDrawing = new GalleryDrawing(imgDrawing,creatorName, collaboratorName);
+      let newGalleryDrawing = new GalleryDrawing(imgDrawing,creatorName, collaboratorName, creatureCollided.emotion);
       galleryList.push(newGalleryDrawing);
+
       
 
       //get rid of creature from list
       creatureList = removeItemOnce(creatureList, creatureCollided);
       //remove id from creatureIDList
-      creatureIDList = removeItemOnce(creatureCollided.id);
+      creatureIDList = removeItemOnce(creatureIDList, creatureCollided.id);
+
+      //workDir
+      //do an emit!! make sure that everyone knows she is GONE
+      //copy format from other place? from create?
+      //x,y,emotion,creator, outline[r,g,b], background[r,g,b],strokes[[x,y]]
+      var data = {
+        x: creatureCollided.x,
+        y: creatureCollided.y,
+        emotion: creatureCollided.emotion,
+        creator: creatureCollided.creator,
+        outline: creatureCollided.outline,
+        background: creatureCollided.background,
+        strokeList: creatureCollided.strokeList,
+        id: creatureCollided.id,
+        direction: creatureCollided.direction,
+        speed: creatureCollided.speed
+        }
+      socket.emit('creatureMovement', data);
+      
+
+      //set strokeList back to 0;
+      strokeList = [];
       
       //back to playField
       gameState = "playField";
@@ -582,8 +606,21 @@ function setup() {
         break;
       case "respondDrawing":
         if (!respondDrawingDrawn){
+
+          
           background(220);
           image(creatureCollided.drawing, 0, 0);
+          push();
+          fill(0);
+          textSize(20);
+          textAlign(CENTER);
+          text("Think of a time you felt the emotion: " + creatureCollided.emotion, width/2, 70);
+          text("Now make an addition to the drawing that represents that experience", width/2, 90);
+          pop();
+
+          
+          //draw text
+
 
           respondDrawingDrawn = true;
         }
@@ -591,6 +628,13 @@ function setup() {
         //draw buttons
         button(submitButtonRespond);
         button(backButtonRespond);
+
+          //draw button triangle
+          push();
+          fill (0,255,0);
+          triangle(width/2 + 100 -29, height - 36, width/2+ 100 -29+12, height - 14, width/2 +100-29+24, height - 36);
+          pop();
+        
         
         break;
 
@@ -610,8 +654,10 @@ function setup() {
           stroke(0);
           textSize(10);
           
-          text ("Creator: " + gDrawing.creator, xPosition, yPosition + galleryHeight + 10);
-          text ("Collaborator: " + gDrawing.collaborator, xPosition, yPosition + galleryHeight + 19);
+          text ("Emotion: " + gDrawing.emotion, xPosition, yPosition + galleryHeight + 10,)
+          text ("Creator: " + gDrawing.creator, xPosition, yPosition + galleryHeight + 20);
+          text ("Collaborator: " + gDrawing.collaborator, xPosition, yPosition + galleryHeight + 30);
+          
           pop();
 
           xPosition = xPosition + galleryWidth + padding;
@@ -754,12 +800,15 @@ function setup() {
     //curWork
     let dataEmptyCheck = Object.keys(data);
     if (dataEmptyCheck.length > 0){
+      
       for (let k of dataEmptyCheck){
         //check if already in list
         if (creatureIDList.includes(k)){
           //update 
           
+          
         }
+       
         else{
           //add new creature
           let item = data[k];
@@ -788,14 +837,55 @@ function setup() {
           newC.direction = item['direction'];
           newC.speed = item['speed'];
           creatureList.push(newC);
+          console.log(creatureIDList);
           creatureIDList.push(newC.id);
           console.log("added new creature");
           console.log(creatureList);
+        }
+      }
+      //check keys in id list to see if it has one dict NO LONGER HAS and remove
+      
+    }
+
+    //check keys in id list to see if it has one dict NO LONGER HAS and remove
+    for (let i of creatureIDList){
+      if (!dataEmptyCheck.includes(i)){
+        let count = 0;
+        for (cr of creatureList){
+          if (cr.id == i){
+            break;
+          }
+          count = count + 1;
+        }
+        //remove from creatures
+        
+        if (creatureList.length > 0){
+          creatureList.splice(count,1);
+        }  
+        
+        //remove from id list
+        let count2 = 0;
+        for (cid of creatureIDList){
+          if (cid == i){
+            break;
+          }
+          count2 = count2 + 1;
+
+          
+        }
+        if (creatureIDList > 0){
+          creatureIDList.splice(count2,1);
+        }
+
+
+
+        
+  
+
+
+       
       }
     }
-  }
-
-    
     
   }
 
